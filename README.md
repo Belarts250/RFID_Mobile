@@ -1,166 +1,242 @@
-# 💳 RFID Integrated MQTT Payment System (Term 1)
+RFID Integrated MQTT Payment Mobile App (Term 1)
 
-> A state-of-the-art, real-time IoT payment solution featuring a premium dashboard, persistent per-UID balance tracking, and multi-protocol communication.
+A real-time IoT payment system with a mobile dashboard, persistent RFID card balances, and live communication using MQTT, WebSockets, and a Node.js backend.
+The system allows users to scan RFID cards, monitor balances, and perform top-ups directly from a mobile application.
 
----
+🏗 System Architecture
 
-## 🏗 System Architecture
+The system connects RFID hardware, cloud messaging, backend services, and a mobile app.
 
-The following diagram illustrates the data flow: **Hardware** ↔ **MQTT Broker** ↔ **Node.js Backend** ↔ **WebSocket** ↔ **Web Dashboard**.
-
-```mermaid
 graph TD
-    subgraph "Hardware (ESP8266)"
-        RFID[RC522 Reader] -->|UID Scan| ESP[ESP8266 NodeMCU]
-        ESP -->|MQTT Pub| Broker[Shared MQTT Broker]
+    subgraph "Hardware Layer (ESP8266)"
+        RFID[RC522 RFID Reader] -->|UID Scan| ESP[ESP8266 NodeMCU]
+        ESP -->|MQTT Publish| Broker[MQTT Broker]
     end
 
-    subgraph "Infrastructure"
-        Broker -->|MQTT Sub/Broadcast| Srv[Node.js Server]
-        Srv -->|WebSocket| Web[Browser Dashboard]
+    subgraph "Backend Layer"
+        Broker -->|MQTT Subscribe| Server[Node.js Backend]
+        Server -->|WebSocket API| Mobile[Mobile App]
     end
 
-    subgraph "User Actions"
-        Dash[Web Dashboard] -->|HTTP POST /topup| Srv
-        Srv -->|MQTT Pub /topup| Broker
-        Broker -->|MQTT Sub| ESP
-        ESP -->|Update Balance| ESP
+    subgraph "User Interaction"
+        AppUser[Mobile App User] -->|Top-up Request| Mobile
+        Mobile -->|HTTP POST /topup| Server
+        Server -->|MQTT Publish| Broker
+        Broker -->|Command| ESP
+        ESP -->|Updated Balance| Broker
     end
-```
 
----
+🛠 Hardware Specifications
+RFID Reader Wiring (RC522 → ESP8266)
+RC522 Pin	ESP8266 Pin	Description
+SDA (SS)	D8	SPI Slave Select
+SCK	D5	SPI Clock
+MOSI	D7	SPI Master Out Slave In
+MISO	D6	SPI Master In Slave Out
+GND	GND	Ground
+RST	D3	Reset
+3.3V	3.3V	Power Supply
+Firmware Logic
 
-## 🛠 Hardware Specifications
+The firmware stores card balances using:
 
-### Wiring Diagram (NodeMCU to RC522)
+std::map<String, int>
 
-| RC522 Pin    | ESP8266 Pin | Description             |
-| :----------- | :---------- | :---------------------- |
-| **SDA (SS)** | **D8**      | SPI Slave Select        |
-| **SCK**      | **D5**      | SPI Clock               |
-| **MOSI**     | **D7**      | SPI Master Out Slave In |
-| **MISO**     | **D6**      | SPI Master In Slave Out |
-| **GND**      | **GND**     | Common Ground           |
-| **RST**      | **D3**      | Reset Pin               |
-| **3.3V**     | **3.3V**    | Power Supply            |
+This allows the system to:
 
-### Firmware Logic
+• maintain independent balances for each RFID card
+• manage memory efficiently
+• isolate card data safely
 
-The firmware uses a `std::map<String, int>` to maintain independent balances for every card scanned. This ensures that memory is used efficiently and card balances are isolated.
+📡 Communication Protocol (MQTT)
 
----
+Team ID
 
-## 📡 Communication Protocol (MQTT)
+1nt3rn4l_53rv3r_3rr0r
 
-**Team ID:** `1nt3rn4l_53rv3r_3rr0r` | **Host:** `157.173.101.159:1883`
+Broker Host
 
-| Action             | Topic                                     | Payload                              | Description                         |
-| :----------------- | :---------------------------------------- | :----------------------------------- | :---------------------------------- |
-| **Status Event**   | `rfid/1nt3rn4l_53rv3r_3rr0r/card/status`  | `{"uid": "...", "balance": 0}`       | Published when a card is scanned.   |
-| **Top-up Command** | `rfid/1nt3rn4l_53rv3r_3rr0r/card/topup`   | `{"uid": "...", "amount": 100}`      | Sent by backend to trigger top-up.  |
-| **Balance Sync**   | `rfid/1nt3rn4l_53rv3r_3rr0r/card/balance` | `{"uid": "...", "new_balance": 100}` | Published by hardware after update. |
+157.173.101.159:1883
+Action	Topic	Payload	Description
+Card Scan Event	rfid/1nt3rn4l_53rv3r_3rr0r/card/status	{"uid":"...","balance":0}	Sent when a card is scanned
+Top-up Command	rfid/1nt3rn4l_53rv3r_3rr0r/card/topup	{"uid":"...","amount":100}	Sent from backend to hardware
+Balance Update	rfid/1nt3rn4l_53rv3r_3rr0r/card/balance	{"uid":"...","new_balance":100}	Hardware publishes new balance
+📱 Mobile Application
 
----
+The system includes a React Native / Expo mobile app that replaces the traditional web dashboard.
 
-## 💻 Software Components
+Key Features
 
-### 1. Web Dashboard (Frontend)
+• Real-Time Card Scanning Events
+The mobile app instantly displays scanned RFID cards.
 
-A high-fidelity **Tailwind CSS** dashboard with:
+• Live Balance Monitoring
+Balances update automatically using WebSockets.
 
-- **Glassmorphism Design:** Dark theme with transparent backdrop blurs.
-- **Dynamic Connection:** Automatically detects hosting environment (Local vs VPS).
-- **Log Terminal:** Real-time stream of all system events.
+• Remote Top-up
+Users can add credit to cards directly from the mobile app.
 
-### 2. Node.js Backend
+• Device Status Monitoring
+Shows whether the RFID reader is connected.
 
-- **Express Server:** Handles manual top-up requests via REST API.
-- **MQTT Translator:** Bridges hardware events to the web.
-- **WebSocket Server:** Pushes live events to all connected clients instantly.
+• Activity Log Viewer
+Displays a stream of all system events.
 
----
+Mobile UI Overview
 
-## 🔌 API Documentation
+Example interface structure:
 
-### **POST** `/topup`
+RFID Payment Mobile App
+-----------------------------
 
-Used by the dashboard or external tools to add funds to a card.
+Reader Status
+🟢 Online
 
-**Request Body:**
+Last Card Scanned
+UID: 1A2B3C4D
 
-```json
+Current Balance
+500 RWF
+
+Actions
+[ Top-up Card ]
+[ View Logs ]
+[ Registered Cards ]
+💻 Backend Server
+
+The backend is built using Node.js and Express.
+
+Responsibilities
+
+• Handle API requests from the mobile app
+• Translate MQTT messages from hardware
+• Broadcast updates using WebSockets
+• Manage top-up commands
+
+🔌 API Documentation
+POST /topup
+
+Adds money to a specific RFID card.
+
+Request
 {
   "uid": "1a2b3c4d",
   "amount": 1000
 }
-```
+Validation Rules
 
-**Validation Rules:**
+amount must be between 1 and 1,000,000
 
-- `amount` must be between `1` and `1,000,000`.
-- `uid` must be a valid string.
+uid must be a valid string
 
----
+🚀 Running the Mobile App
+1 Install Requirements
 
-## 🚀 Deployment Guide
+Install:
 
-### 💻 Local Environment Setup
+Node.js (v16+)
 
-Follow these steps to get the entire system running on your local machine and hardware.
+Arduino IDE
 
-#### 1. Software Prerequisites
+Expo CLI
 
-- **Node.js**: [Download & Install](https://nodejs.org/) (v16+ recommended).
-- **Arduino IDE**: [Download & Install](https://www.arduino.cc/en/software).
-- **MQTT Explorer (Optional)**: Great for debugging. [Download here](http://mqtt-explorer.com/).
+npm install -g expo
+⚙ Backend Setup
 
-#### 2. ESP8266 Firmware Setup
+Navigate to the project folder:
 
-1.  **Open Project**: Open `RFID_MQTT/RFID_MQTT.ino` in Arduino IDE.
-2.  **Board Manager**:
-    - Go to `File > Preferences`.
-    - Add to "Additional Boards Manager URLs": `http://arduino.esp8266.com/stable/package_esp8266com_index.json`
-    - Go to `Tools > Board > Boards Manager`, search for **esp8266**, and install.
-3.  **Install Libraries**: Go to `Sketch > Include Library > Manage Libraries` and install:
-    - **MFRC522** (by GithubCommunity)
-    - **PubSubClient** (by Nick O'Leary)
-    - **ArduinoJson** (by Benoit Blanchon)
-4.  **Configure Code**:
-    - Update `WIFI_SSID` and `WIFI_PASS` in `RFID_MQTT.ino` (Lines 11-12).
-    - Ensure `MQTT_HOST` is set correctly (Line 13).
-5.  **Flash**: Select your board (e.g., NodeMCU 1.0) and Port, then click **Upload**.
+npm install
 
-#### 3. Node.js Backend Setup
+Start the backend server:
 
-1.  **Open Terminal**: Navigate to the project root directory.
-2.  **Install Dependencies**:
-    ```bash
-    npm install
-    ```
-3.  **Start Server**:
-    ```bash
-    node server.js
-    ```
-    _Note: The backend acts as a translator, bridging MQTT events to the web dashboard via WebSockets._
+node server.js
 
-#### 4. Access the Dashboard
+The backend will run on:
 
-- Open your browser and go to: `http://localhost:5000`
-- Scan an RFID card; you should see the UID and balance appear in the log terminal instantly.
+http://localhost:5000
+📱 Start the Mobile App
 
----
+Inside the mobile app folder run:
 
-## 🌐 Live Dashboard
+npx expo start
 
-Access the deployed system dashboard here:
-👉 **[RFID System Live Dashboard](http://157.173.101.159:9271/rfid-dashboard.html)**
+Then:
 
----
+Install Expo Go on your tablet or phone
 
-- **"Serial Port not found"**: Ensure you have the [CH340 drivers](https://sparks.gogo.co.nz/ch340.html) installed for your NodeMCU.
-- **WebSocket Connection Failed**: Ensure `server.js` is running and `PORT 5000` is not blocked by your local firewall.
-- **MQTT Connection Failed**: Check your internet connection and ensure the host `157.173.101.159` is reachable.
-- **Card not reading?** Double-check the SPI wiring. The most common error is swapping SDA (D8) or RST (D3).
-- **Balance remains 0?** The system uses `std::map` in RAM; if the ESP8266 restarts, balances will reset unless top-ups are re-issued.
+Scan the QR code
 
----
+The RFID dashboard opens as a mobile application
+
+🔧 ESP8266 Firmware Setup
+
+Open the firmware file:
+
+RFID_MQTT/RFID_MQTT.ino
+
+Install required libraries:
+
+MFRC522
+
+PubSubClient
+
+ArduinoJson
+
+Update:
+
+WIFI_SSID
+WIFI_PASS
+MQTT_HOST
+
+Upload the code to the NodeMCU board.
+
+🌐 System Workflow
+RFID Card
+   ↓
+RC522 Reader
+   ↓
+ESP8266
+   ↓ MQTT
+MQTT Broker
+   ↓
+Node.js Backend
+   ↓
+Mobile App
+
+The mobile app becomes the control dashboard for the entire system.
+
+🧪 Troubleshooting
+Device Not Detected
+
+Install the CH340 driver for NodeMCU:
+
+https://sparks.gogo.co.nz/ch340.html
+
+MQTT Connection Failed
+
+Check if the broker is reachable:
+
+157.173.101.159
+Mobile App Cannot Connect
+
+Make sure:
+
+• backend server is running
+• port 5000 is not blocked
+• phone and server are on the same network
+
+RFID Not Reading
+
+Check wiring carefully, especially:
+
+SDA → D8
+RST → D3
+Balance Resets
+
+Balances are stored in RAM using std::map.
+
+If ESP8266 restarts:
+
+• balances reset
+• top-ups must be reissued
+
