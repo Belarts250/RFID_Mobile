@@ -9,4 +9,4 @@ This project uses the following MQTT topics for communication between the ESP826
 | `rfid/{team_id}/card/topup` | Server -> ESP8266 | Published when a top-up is processed. ESP8266 should update local balance. |
 | `rfid/{team_id}/card/pay` | Server -> ESP8266 | Published when a payment is processed. ESP8266 should update local balance. |
 
-**Base Path:** `rfid/1nt3rn4l_53rv3r_3rr0r/`
+**Base Path:** `rfid/5ynth4x 3rr0r/`

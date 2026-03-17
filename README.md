@@ -52,15 +52,15 @@ This allows the system to:
 
 Team ID
 
-1nt3rn4l_53rv3r_3rr0r
+5ynth4x 3rr0r
 
 Broker Host
 
 157.173.101.159:1883
 Action	Topic	Payload	Description
-Card Scan Event	rfid/1nt3rn4l_53rv3r_3rr0r/card/status	{"uid":"...","balance":0}	Sent when a card is scanned
-Top-up Command	rfid/1nt3rn4l_53rv3r_3rr0r/card/topup	{"uid":"...","amount":100}	Sent from backend to hardware
-Balance Update	rfid/1nt3rn4l_53rv3r_3rr0r/card/balance	{"uid":"...","new_balance":100}	Hardware publishes new balance
+Card Scan Event	rfid/5ynth4x 3rr0r/card/status	{"uid":"...","balance":0}	Sent when a card is scanned
+Top-up Command	rfid/5ynth4x 3rr0r/card/topup	{"uid":"...","amount":100}	Sent from backend to hardware
+Balance Update	rfid/5ynth4x 3rr0r/card/balance	{"uid":"...","new_balance":100}	Hardware publishes new balance
 📱 Mobile Application
 
 The system includes a React Native / Expo mobile app that replaces the traditional web dashboard.

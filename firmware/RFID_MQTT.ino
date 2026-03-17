@@ -13,7 +13,7 @@
 #define MQTT_HOST     "157.173.101.159"
 
 #define MQTT_PORT     1883
-#define TEAM_ID       "1nt3rn4l_53rv3r_3rr0r"
+#define TEAM_ID       "5ynth4x 3rr0r"
 
 /* ==========================================================
    AUTO-GENERATED TOPICS

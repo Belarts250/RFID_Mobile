@@ -558,7 +558,7 @@ function showReceipt(d) {
     <div class="receipt-row receipt-total"><span>Total:</span><span>$${d.totalCost.toLocaleString()}</span></div>
     <div class="receipt-row"><span>Prev Balance:</span><span>$${d.balanceBefore.toLocaleString()}</span></div>
     <div class="receipt-row"><span>Remaining:</span><span style="color:green">$${d.balanceAfter.toLocaleString()}</span></div><hr/>
-    <div class="receipt-footer">${new Date().toLocaleString()}<br>Team: 1nt3rn4l_53rv3r_3rr0r<br>
+    <div class="receipt-footer">${new Date().toLocaleString()}<br>Team: 5ynth4x 3rr0r<br>
       <button class="btn btn-outline btn-sm" style="margin-top:8px;color:#333;border-color:#ccc" onclick="window.print()">🖨 Print</button>
     </div></div>`;
 }
