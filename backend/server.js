@@ -25,6 +25,12 @@ import http from "http";
 import WebSocket, { WebSocketServer } from "ws";
 import mqtt from "mqtt";
 import cors from "cors";
+import { fileURLToPath } from "url";
+import { dirname, join } from "path";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
 import {
   getUser,
   createUser,
@@ -42,14 +48,14 @@ import {
   getDashboardStats,
   getAllTransactions,
   getCardTransactions,
-} from "./database.js";
+} from "../database/database.js";
 
 /* ==========================================================
    EXPRESS + HTTP + WEBSOCKET SETUP
    ========================================================== */
 const app = express();
 app.use(cors());
-app.use(express.static("public"));
+app.use(express.static(join(__dirname, "public")));
 app.use(express.json());
 
 const server = http.createServer(app);
